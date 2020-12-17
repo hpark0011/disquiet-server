@@ -9,13 +9,16 @@
     "@koa/router": "^10.0.0",
     "apollo-server-koa": "^2.19.0",
     "axios": "^0.21.0",
+    "dotenv": "^8.2.0",
+    "googleapis": "^66.0.0",
     "graphql": "^15.4.0",
     "koa": "^2.13.0",
+    "koa-bodyparser": "^4.3.0",
     "lodash": "^4.17.20",
     "mysql2": "^2.2.5",
     "sequelize": "^6.3.5"
   },
   "scripts": {
-    "build": "node --experimental-modules --es-module-specifier-resolution=node src/server.js"
+    "build": "nodemon --experimental-modules --es-module-specifier-resolution=node src/server.js"
   }
 }
