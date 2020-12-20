@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-koa';
 import User from '../database/models/User';
 
 export const typeDef = gql`
-  enum Provider {
+  enum AccountProvider {
     GOOGLE
   }
 
@@ -11,7 +11,7 @@ export const typeDef = gql`
     email: String
     username: String
     profile_image: String
-    provider: Provider
+    account_provider: AccountProvider
     is_receiving_newsletter: Boolean
     is_policy_agreed: Boolean
   }
@@ -22,7 +22,7 @@ export const typeDef = gql`
     email: String
     username: String
     profile_image: String
-    provider: Provider
+    account_provider: AccountProvider
     is_receiving_newsletter: Boolean
     is_policy_agreed: Boolean
     created_at: Date

@@ -1,26 +1,27 @@
-import Sequelize from 'sequelize';
+import Sequelize, { DataTypes } from 'sequelize';
 import { config } from '../config/config';
+import AuthToken from './AuthToken';
 import User from './User';
 
-const models = {};
+const db = {};
 const { NODE_ENV } = process.env;
 
-const sequelize = new Sequelize({
+export const sequelize = new Sequelize({
   database: config[NODE_ENV].database,
   username: config[NODE_ENV].username,
   password: config[NODE_ENV].password,
   host: config[NODE_ENV].host,
   port: config[NODE_ENV].port,
   dialect: config[NODE_ENV].dialect,
-  logging: console.log,
 });
 
-models.User = User(sequelize, Sequelize.DataTypes);
+db.AuthToken = AuthToken(sequelize, DataTypes);
+db.User = User(sequelize, DataTypes);
 
-Object.keys(models).forEach(modelName => {
-  if (models[modelName].associate) {
-    models[modelName].associate(models);
+Object.keys(db).forEach(modelName => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
   }
 });
 
-export default sequelize;
+export default db;

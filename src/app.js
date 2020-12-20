@@ -1,12 +1,13 @@
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import { ApolloServer } from 'apollo-server-koa';
-import routes from './routes';
+import router from './router';
 import schema from './graphql/schema';
 
 const app = new Koa();
 app.use(bodyParser());
-app.use(routes.routes());
+app.use(router.routes());
+app.use(router.allowedMethods());
 
 const server = new ApolloServer({ 
   schema,

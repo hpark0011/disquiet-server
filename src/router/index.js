@@ -1,9 +1,10 @@
 import Router from '@koa/router';
 // import ApolloServer from 'apollo-server-koa';
+import api from './api/index';
 
-const routes = new Router();
+const router = new Router();
 
-// routes.use('/api', api.routes());
+router.use('/api', api.routes());
 
 // routes.get('/graphiql',
 //   ApolloServer.graphiqlKoa({
@@ -11,8 +12,8 @@ const routes = new Router();
 //   }),
 // );
 
-routes.get('/', ctx => {
+router.get('/', ctx => {
   ctx.body = 'hello world!';
 });
 
-export default routes;
+export default router;
