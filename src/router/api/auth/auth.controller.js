@@ -49,8 +49,8 @@ export const googleCallback = async (ctx, next) => {
     ctx.state.accessToken = accessToken;
     ctx.state.provider = 'google';
     return next();
-  } catch (e) {
-    ctx.throw(500, e);
+  } catch (err) {
+    ctx.throw(500, err);
   }
 };
 
@@ -60,7 +60,6 @@ export const googleCallback = async (ctx, next) => {
 export const authCallback = async ctx => {
   try {
     const { profile, accessToken, provider } = ctx.state;
-
     if (!profile || !accessToken) return;
 
     // Check if the user already exists
@@ -100,8 +99,28 @@ export const authCallback = async ctx => {
         ? 'http://localhost:3000/register'
         : 'https://REAL-CLIENT-URL/register';
     ctx.redirect(encodeURI(redirectUrl));
-  } catch (e) {
-    ctx.throw(500, e);
+  } catch (err) {
+    ctx.throw(500, err);
+  }
+};
+
+/**
+ * Get user's profile from register token
+ *
+ * GET /api/auth/profile
+ */
+export const getProfile = async ctx => {
+  const registerToken = ctx.cookies.get('registerToken');
+  if (!registerToken) {
+    ctx.status = 401;
+    return;
+  }
+  try {
+    const decoded = await decodeToken(registerToken);
+    ctx.body = decoded.profile;
+  } catch (err) {
+    ctx.status = 400;
+    return;
   }
 };
 
@@ -123,8 +142,8 @@ export const registerUser = async ctx => {
   let decoded = null;
   try {
     decoded = await decodeToken(registerToken);
-  } catch (e) {
-    // failed to decode token
+  } catch (err) {
+    // Failed to decode token
     ctx.status = 401;
     return;
   }
@@ -173,6 +192,21 @@ export const registerUser = async ctx => {
         refresh_token: tokens.refreshToken
       }
     };
+  } catch (err) {}
+}
 
-  } catch (e) {}
+/**
+ * Log out user
+ *
+ * POST /api/auth/logout
+ */
+export const logOutUser = async ctx => {
+  // clear cookies
+  ctx.cookies.set('accessToken', '', {
+    // domain: process.env.NODE_ENV === 'development' ? undefined : '.disquiet.tech'
+  });
+  ctx.cookies.set('refreshToken', '', {
+    // domain: process.env.NODE_ENV === 'development' ? undefined : '.disquiet.tech'
+  });
+  ctx.status = 204;
 }
