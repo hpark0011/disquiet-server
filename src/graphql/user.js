@@ -1,27 +1,27 @@
-import { gql } from 'apollo-server-koa';
-import User from '../database/models/User';
+import { gql, AuthenticationError, ApolloError } from 'apollo-server-koa';
+import db from '../database/models';
 
 export const typeDef = gql`
   enum AccountProvider {
-    GOOGLE
+    google
   }
 
   input UserInput {
-    name: String
-    email: String
+    display_name: String
     username: String
-    profile_image: String
-    account_provider: AccountProvider
-    is_receiving_newsletter: Boolean
-    is_policy_agreed: Boolean
+    role: String
+    employer: String
+    profile_image_url: String
   }
 
   type User {
     id: Int!
-    name: String
+    display_name: String
     email: String
     username: String
-    profile_image: String
+    role: String
+    employer: String
+    profile_image_url: String
     account_provider: AccountProvider
     is_receiving_newsletter: Boolean
     is_policy_agreed: Boolean
@@ -29,22 +29,41 @@ export const typeDef = gql`
     updated_at: Date
   }
 
-  # extend type Query {
-  #   user(id: Int!): User
-  # }
+  type Query {
+    user(id: Int!): User
+  }
 
-  # extend type Mutation {
-  #   updateUser(): User
-  #   deleteUser(id: Int!): Boolean
-  # }
+  type Mutation {
+    updateUser(id: Int!, input: UserInput): User
+    deleteUser(id: Int!): Boolean
+  }
 `;
 
 export const resolvers = {
-  // Query: {
-  //   user: (_, { id }) => getUser(id),
-  // },
-  // Mutation: {
-  //   updateUser: (_, args) => updateUser(),
-  //   deleteUser: (_, { id }) => deleteUser(id),
-  // }
+  Query: {
+    user: async (_, { id }) => {
+      return await db.User.findByPk(id);
+    },
+  },
+  Mutation: {
+    updateUser: async (_, { id, input }, ctx) => {
+      if (!ctx.userId) throw new AuthenticationError('User is not logged in!');
+      
+      const user = await db.User.findByPk(id);
+      if (!user) throw new ApolloError('Cannot find user');
+
+      Object.assign(user, input);
+      return await user.save(); // TODO: check what it returns
+    },
+    deleteUser: async (_, { id }, ctx) => {
+      if (!ctx.userId) throw new AuthenticationError('User is not logged in!');
+      
+      const user = await db.User.findByPk(id);
+      if (!user) throw new ApolloError('Cannot find user');
+
+      ctx.removeCookies();
+      return await user.destroy(); // TODO: check what it returns
+      // return await db.User.destroy({ where : { id } });
+    }
+  }
 }

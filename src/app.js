@@ -3,11 +3,11 @@ import bodyParser from 'koa-bodyparser';
 import { ApolloServer } from 'apollo-server-koa';
 import router from './router';
 import schema from './graphql/schema';
-import { verifyUser } from './lib/auth/token';
+import { authUser } from './lib/auth/token';
 
 const app = new Koa();
 app.use(bodyParser());
-app.use(verifyUser());
+app.use(authUser);
 app.use(router.routes());
 app.use(router.allowedMethods());
 
@@ -16,7 +16,11 @@ const server = new ApolloServer({
   context: async ({ ctx }) => {
     try {
       return {
-        user_id: ctx.state.user_id
+        userId: ctx.state.userId,
+        removeCookies: () => {
+          ctx.cookies.set('accessToken');
+          ctx.cookies.set('refereshToken');
+        }
       };
     } catch (err) {
       return {};

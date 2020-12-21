@@ -47,7 +47,7 @@ export const decodeToken = async (token) => {
 export const renewToken = async (ctx, refreshToken) => {
   try {
     const decoded = await decodeToken(refreshToken);
-    const user = await db.User.findOne({ where : { id: decoded.user_id } });
+    const user = await db.User.findByPk(decoded.user_id);
     if (!user) {
       throw new Error('Invalid User!');
     }
@@ -59,7 +59,7 @@ export const renewToken = async (ctx, refreshToken) => {
   }
 };
 
-export const verifyUser = async (ctx, next) => {
+export const authUser = async (ctx, next) => {
   // Ignore when logging out
   if (ctx.path.includes('/auth/logout')) return next();
 
@@ -77,18 +77,18 @@ export const verifyUser = async (ctx, next) => {
       throw new Error('No Access Token!');
     }
     const decoded = await decodeToken(accessToken);
-    ctx.state.user_id = decoded.user_id;
+    ctx.state.userId = decoded.userId;
     // Renew token when access token remaining time is less than 30 min
     const remainingTime = decoded.exp * 1000 - new Date().getTime();
     if (refreshToken && remainingTime < 1000 * 60 * 30) {
       await renewToken(ctx, refreshToken);
     }
   } catch (err) {
-    // Invalid access token
+    // Invalid or no access token
     if (!refreshToken) return next();
     try {
       const userId = await renewToken(ctx, refreshToken);
-      ctx.state.user_id = userId;
+      ctx.state.userId = userId;
     } catch (err) {}
   }
 
