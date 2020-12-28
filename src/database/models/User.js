@@ -14,15 +14,16 @@ export default (sequelize, DataTypes) => {
     },
     username: {
       type: DataTypes.STRING,
+      allowNull: false,
       unique: true
     },
+    account_provider: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    profile_image_url: DataTypes.STRING,
     role: DataTypes.STRING,
     employer: DataTypes.STRING,
-    profile_image_url: DataTypes.STRING,
-    account_provider: {
-      type: DataTypes.ENUM,
-      values: ['google']
-    },
     is_receiving_newsletter: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
@@ -38,6 +39,14 @@ export default (sequelize, DataTypes) => {
 
   User.associate = (db) => {
     User.hasMany(db.AuthToken, { 
+      foreignKey: { allowNull: false }, 
+      onDelete: 'CASCADE'
+    });
+    User.hasMany(db.ProductUpvote, {
+      foreignKey: { allowNull: false }, 
+      onDelete: 'CASCADE'
+    });
+    User.hasMany(db.Comment, {
       foreignKey: { allowNull: false }, 
       onDelete: 'CASCADE'
     });
