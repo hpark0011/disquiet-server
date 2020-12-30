@@ -16,7 +16,7 @@ export const typeDef = gql`
     thumbnail_url: String
     view_count: Int
     upvote_count: Int
-    categories: [Int]
+    categories: [String]
     is_maker: Boolean
   }
 
@@ -27,6 +27,7 @@ export const typeDef = gql`
     link_url: String
     description: String
     thumbnail_url: String
+    ProductCategories: [ProductCategory]
     view_count: Int
     upvote_count: Int
     is_approved: Boolean
@@ -52,7 +53,17 @@ export const typeDef = gql`
 export const resolvers = {
   Query: {
     product: async (_, { id }) => {
-      return await db.Product.findByPk(id);
+      const product = await db.Product.findByPk(id, {
+        include: {
+          model: ProductCategory,
+          through: {
+            where: {
+              product_id: id
+            }
+          }
+        }
+      });
+      return product;
     },
     products: async (_, { categoryId }) => {
       if (categoryId) {
@@ -95,10 +106,11 @@ export const resolvers = {
 
           // Map product to productCategories
           if (input.categories && input.categories.length > 0) {
-            const ppcs = input.categories.map(categoryId => {
+            const ppcs = input.categories.map(category => {
+              const productCatId = await ProductCategory.getIdFromName(category);
               const ppc = new ProductsProductCategories();
               ppc.product_id = newProduct.id;
-              ppc.product_category_id = categoryId;
+              ppc.product_category_id = productCatId;
               return ppc;
             });
             await db.ProductsProductCategories.bulkCreate(ppcs, { transaction: t });
@@ -107,7 +119,7 @@ export const resolvers = {
           return newProduct;
         });
       } catch(err) {
-        console.log(err);
+        console.log('Create product transaction failed: ', err);
       }
     },
     updateProduct: async (_, { id, input }, ctx) => {

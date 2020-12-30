@@ -17,5 +17,14 @@ export default (sequelize, DataTypes) => {
     ProductCategory.belongsToMany(db.Product, { through: db.ProductsProductCategories });
   }
 
+  ProductCategory.getIdFromName = async (categoryName) => {
+    const category = await db.ProductCategory.findOne({
+      where: {
+        name: categoryName
+      }
+    });
+    return category.id;
+  }
+
   return ProductCategory;
 }
