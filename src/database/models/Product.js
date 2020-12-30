@@ -18,10 +18,7 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: false
     },
-    thumbnail_url: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
+    thumbnail_url: DataTypes.STRING,
     view_count: {
       type: DataTypes.INTEGER,
       defaultValue: 0
@@ -34,7 +31,7 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },
-    approval_date: DataTypes.DATE
+    approved_at: DataTypes.DATE
   }, {
     underscored: true,
   });
@@ -61,7 +58,7 @@ export default (sequelize, DataTypes) => {
       onDelete: 'CASCADE'
     });
     Product.associate = (db) => {
-      Product.belongsToMany(db.ProductCategory, { through: 'products_product_categories' });
+      Product.belongsToMany(db.ProductCategory, { through: db.ProductsProductCategories });
     };
   }
 

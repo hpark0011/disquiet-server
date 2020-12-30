@@ -17,6 +17,7 @@ const server = new ApolloServer({
     try {
       return {
         userId: ctx.state.userId,
+        clientIp: ctx.request.ip,
         removeCookies: () => {
           ctx.cookies.set('accessToken');
           ctx.cookies.set('refereshToken');

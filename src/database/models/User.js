@@ -18,7 +18,7 @@ export default (sequelize, DataTypes) => {
       unique: true
     },
     account_provider: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING, // ENUM doesn't work...
       allowNull: false,
     },
     profile_image_url: DataTypes.STRING,

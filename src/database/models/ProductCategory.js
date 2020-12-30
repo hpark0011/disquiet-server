@@ -10,10 +10,11 @@ export default (sequelize, DataTypes) => {
     },
   }, {
     underscored: true,
+    timestamps: false
   });
 
   ProductCategory.associate = (db) => {
-    ProductCategory.belongsToMany(db.Product, { through: 'products_product_categories' });
+    ProductCategory.belongsToMany(db.Product, { through: db.ProductsProductCategories });
   }
 
   return ProductCategory;

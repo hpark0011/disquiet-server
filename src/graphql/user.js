@@ -62,8 +62,9 @@ export const resolvers = {
       if (!user) throw new ApolloError('Cannot find user');
 
       ctx.removeCookies();
-      return await user.destroy(); // TODO: check what it returns
-      // return await db.User.destroy({ where : { id } });
+      await user.destroy(); // TODO: check what it returns
+      // await db.User.destroy({ where : { id } });
+      return true;
     }
   }
 }
