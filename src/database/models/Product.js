@@ -21,11 +21,13 @@ export default (sequelize, DataTypes) => {
     thumbnail_url: DataTypes.STRING,
     view_count: {
       type: DataTypes.INTEGER,
-      defaultValue: 0
+      defaultValue: 0,
+      allowNull: false
     },
     upvote_count: {
       type: DataTypes.INTEGER,
-      defaultValue: 0
+      defaultValue: 0,
+      allowNull: false
     },
     is_approved: {
       type: DataTypes.BOOLEAN,

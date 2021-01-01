@@ -36,13 +36,18 @@ export const typeDef = gql`
     updated_at: Date
   }
 
-  type Query {
+  type ProductCategory {
+    id: Int!
+    name: String
+  }
+
+  extend type Query {
     product(id: Int!): Product
     products(categoryId: Int): [Product]
   }
 
-  type Mutation {
-    createProuct(input: ProductInput): Product
+  extend type Mutation {
+    createProduct(input: ProductInput): Product
     updateProduct(id: Int!, input: ProductInput): Product
     deleteProduct(id: Int!): Boolean
     viewProduct(id: Int!): Boolean
@@ -107,10 +112,9 @@ export const resolvers = {
           // Map product to productCategories
           if (input.categories && input.categories.length > 0) {
             const ppcs = input.categories.map(category => {
-              const productCatId = await ProductCategory.getIdFromName(category);
               const ppc = new ProductsProductCategories();
-              ppc.product_id = newProduct.id;
-              ppc.product_category_id = productCatId;
+              ppc.product_id = newProduct.id; // TODO: NEEDS CHECKING
+              ppc.product_category_id = ProductCategory.getIdFromName(category);
               return ppc;
             });
             await db.ProductsProductCategories.bulkCreate(ppcs, { transaction: t });
@@ -211,4 +215,4 @@ export const resolvers = {
       return product;
     },
   }
-}
+};

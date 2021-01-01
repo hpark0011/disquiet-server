@@ -3,11 +3,7 @@ export default (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING,
       allowNull: false
-    },
-    is_active: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
+    }
   }, {
     underscored: true,
     timestamps: false

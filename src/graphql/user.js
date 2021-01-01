@@ -29,11 +29,11 @@ export const typeDef = gql`
     updated_at: Date
   }
 
-  type Query {
+  extend type Query {
     user(id: Int!): User
   }
 
-  type Mutation {
+  extend type Mutation {
     updateUser(id: Int!, input: UserInput): User
     deleteUser(id: Int!): Boolean
   }
