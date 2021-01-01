@@ -50,6 +50,10 @@ export default (sequelize, DataTypes) => {
       foreignKey: { allowNull: false }, 
       onDelete: 'CASCADE'
     });
+    User.hasMany(db.CommentLike, {
+      foreignKey: { allowNull: false }, 
+      onDelete: 'CASCADE'
+    });
   }
 
   User.prototype.generateUserToken = async () => {

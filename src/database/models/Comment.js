@@ -8,7 +8,8 @@ export default (sequelize, DataTypes) => {
     },
     like_count: {
       type: DataTypes.INTEGER,
-      defaultValue: 0
+      defaultValue: 0,
+      allowNull: false
     }
   }, {
     underscored: true,
@@ -20,6 +21,10 @@ export default (sequelize, DataTypes) => {
       onDelete: 'CASCADE',
     });
     Comment.belongsTo(db.User, {
+      foreignKey: { allowNull: false },
+      onDelete: 'CASCADE',
+    });
+    Comment.hasMany(db.CommentLike, {
       foreignKey: { allowNull: false },
       onDelete: 'CASCADE',
     });

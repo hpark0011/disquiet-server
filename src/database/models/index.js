@@ -2,6 +2,7 @@ import Sequelize, { DataTypes } from 'sequelize';
 import { config } from '../config/config';
 import AuthToken from './AuthToken';
 import Comment from './Comment';
+import CommentLike from './CommentLike';
 import Product from './Product';
 import ProductCategory from './ProductCategory';
 import ProductsProductCategories from './ProductsProductCategories';
@@ -23,6 +24,7 @@ export const sequelize = new Sequelize({
 
 db.AuthToken = AuthToken(sequelize, DataTypes);
 db.Comment = Comment(sequelize, DataTypes);
+db.CommentLike = CommentLike(sequelize, DataTypes);
 db.Product = Product(sequelize, DataTypes);
 db.ProductCategory = ProductCategory(sequelize, DataTypes);
 db.ProductsProductCategories = ProductsProductCategories(sequelize, DataTypes);

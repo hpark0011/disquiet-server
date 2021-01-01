@@ -1,29 +1,31 @@
 import merge from 'lodash/merge';
 import { gql, makeExecutableSchema } from 'apollo-server-koa';
 import * as user from './user';
+import * as product from './product';
+import * as comment from './comment';
 
 // Construct a schema, using GraphQL schema language
 const typeDef = gql`
   scalar Date
   type Query {
-    _: String
+    _version: String
   }
   type Mutation {
-    _: String
+    _empty: String
   }
 `;
- 
-// Provide resolver functions for your schema fields
-const resolvers = {
-  Query: {},
-  Mutation: {}
-};
 
 const schema = makeExecutableSchema({
-  typeDefs: [typeDef, user.typeDef],
+  typeDefs: [
+    typeDef,
+    user.typeDef,
+    product.typeDef,
+    comment.typeDef
+  ],
   resolvers: merge(
-    resolvers,
-    user.resolvers
+    user.resolvers,
+    product.resolvers,
+    comment.resolvers
   )
 });
 
