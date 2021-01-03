@@ -6,6 +6,7 @@ import ProductView from '../database/models/ProductView';
 import ProductUpvote from '../database/models/ProductUpvote';
 import Product from '../database/models/Product';
 import ProductsProductCategories from '../database/models/ProductsProductCategories';
+import Comment from '../database/models/Comment';
 
 export const typeDef = gql`
   input ProductInput {
@@ -27,7 +28,8 @@ export const typeDef = gql`
     link_url: String
     description: String
     thumbnail_url: String
-    ProductCategories: [ProductCategory]
+    product_categories: [ProductCategory]
+    comments: [Comment]
     view_count: Int
     upvote_count: Int
     is_approved: Boolean
@@ -59,38 +61,33 @@ export const resolvers = {
   Query: {
     product: async (_, { id }) => {
       const product = await db.Product.findByPk(id, {
-        include: {
-          model: ProductCategory,
-          through: {
-            where: {
-              product_id: id
-            }
-          }
-        }
+        include: [
+          {
+            model: ProductCategory,
+            through: { attributes: [] }
+          },
+          Comment
+        ]
       });
       return product;
     },
     products: async (_, { categoryId }) => {
-      if (categoryId) {
-        return await db.Product.findAll({
-          where: {
-            is_approved: true
-          },
-          include: {
-            model: ProductCategory,
-            through: {
-              where: {
-                product_category_id: categoryId
-              }
-            }
-          }
-        });
-      }
-      return await db.Product.findAll({
+      const products = await db.Product.findAll({
         where: {
-          is_approved: true
-        }
+          is_approved: true,
+        },
+        include: [
+          {
+            model: ProductCategory,
+            through: { attributes: [] }
+          },
+          Comment
+        ]
       });
+      if (categoryId) {
+        return products.filter(product => product.product_categories.some(pc => pc.id === categoryId));
+      }
+      return products;
     },
   },
   Mutation: {
