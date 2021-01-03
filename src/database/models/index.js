@@ -1,5 +1,6 @@
 import Sequelize, { DataTypes } from 'sequelize';
 import { config } from '../config/config';
+import AdminUser from './AdminUser';
 import AuthToken from './AuthToken';
 import Comment from './Comment';
 import CommentLike from './CommentLike';
@@ -31,6 +32,7 @@ db.ProductsProductCategories = ProductsProductCategories(sequelize, DataTypes);
 db.ProductUpvote = ProductUpvote(sequelize, DataTypes);
 db.ProductView = ProductView(sequelize, DataTypes);
 db.User = User(sequelize, DataTypes);
+db.AdminUser = AdminUser(sequelize, DataTypes);
 
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {

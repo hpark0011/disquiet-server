@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import db from '../../database/models';
 
-const { SECRET_KEY } = process.env;
+const { JWT_SECRET_KEY } = process.env;
 
 export const generateToken = async (payload, options) => {
   const jwtOptions = {
@@ -14,7 +14,7 @@ export const generateToken = async (payload, options) => {
   //   delete jwtOptions.expiresIn;
   // }
   return new Promise((resolve, reject) => {
-    jwt.sign(payload, SECRET_KEY, jwtOptions, (err, token) => {
+    jwt.sign(payload, JWT_SECRET_KEY, jwtOptions, (err, token) => {
       if (err) reject(err);
       resolve(token);
     });
@@ -37,7 +37,7 @@ export const setTokenCookie = (ctx, tokens) => {
 
 export const decodeToken = async (token) => {
   return new Promise((resolve, reject) => {
-    jwt.verify(token, SECRET_KEY, (err, decoded) => {
+    jwt.verify(token, JWT_SECRET_KEY, (err, decoded) => {
       if (err) reject(err);
       resolve(decoded);
     });
