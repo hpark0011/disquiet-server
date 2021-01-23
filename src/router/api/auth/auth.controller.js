@@ -1,6 +1,5 @@
 import { Op } from 'sequelize';
 import db from '../../../database/models';
-import User from '../../../database/models/User';
 import { generateAuthUrl, baseRedirectUrl } from '../../../lib/auth';
 import { getGoogleAccessToken, getGoogleProfile } from '../../../lib/auth/google';
 import { generateToken, setTokenCookie, decodeToken } from '../../../lib/auth/token';
@@ -39,13 +38,8 @@ export const googleCallback = async (ctx, next) => {
      * profile = { displayName, email, profileImageUrl }
      */
     const profile = await getGoogleProfile(accessToken);
-    // const socialAccount = await getSocialAccount({
-    //   uid: profile.uid,
-    //   provider: 'google'
-    // });
 
     ctx.state.profile = profile;
-    // ctx.state.socialAccount = socialAccount;
     ctx.state.accessToken = accessToken;
     ctx.state.provider = 'google';
     return next();
@@ -64,19 +58,23 @@ export const authCallback = async ctx => {
 
     // Check if the user already exists
     if (profile.email) {
-      const user = await db.User.findOne({ where : { email: profile.email } });
+      const user = await db.User.findOne({ 
+        where: { 
+          email: profile.email
+        }
+      });
       // If exists, log in
       if (user) {
         const tokens = await user.generateUserToken();
         setTokenCookie(ctx, tokens);
         const redirectUrl = process.env.NODE_ENV === 'development' 
-          ? 'http://localhost:3000/' 
-          : 'https://REAL-CLIENT-URL/';
+          ? 'http://localhost:3000' 
+          : 'https://REAL-CLIENT-URL';
         
         const state = ctx.query.state ? JSON.parse(ctx.query.state) : null;
-        const next = ctx.query.next || (state ? state.next : '/');
+        const nextUri = ctx.query.nextUri || state ? state.nextUri : '/';
 
-        ctx.redirect(encodeURI(redirectUrl.concat(next)));
+        ctx.redirect(encodeURI(redirectUrl.concat(nextUri)));
         return;
       }
     }
@@ -96,8 +94,8 @@ export const authCallback = async ctx => {
 
     const redirectUrl =
       process.env.NODE_ENV === 'development'
-        ? 'http://localhost:3000/register'
-        : 'https://REAL-CLIENT-URL/register';
+        ? 'http://localhost:3000/register?oauth=1'
+        : 'https://REAL-CLIENT-URL/register?oauth=1';
     ctx.redirect(encodeURI(redirectUrl));
   } catch (err) {
     ctx.throw(500, err);
@@ -137,7 +135,14 @@ export const registerUser = async ctx => {
     return;
   }
 
-  const { display_name, username, role, employer, is_receiving_newsletter, is_policy_agreed } = ctx.request.body;
+  const { 
+    display_name,
+    username,
+    role,
+    employer,
+    is_receiving_newsletter,
+    is_policy_agreed
+  } = ctx.request.body;
 
   let decoded = null;
   try {
@@ -169,30 +174,32 @@ export const registerUser = async ctx => {
     }
 
     // Create new user
-    const user = new User();
-    user.display_name = display_name;
-    user.email = email;
-    user.username = username;
-    user.role = role;
-    user.employer = employer;
-    user.profile_image_url = decoded.profile.profileImageUrl; // TODO: image S3 upload
-    user.account_provider = decoded.provider;
-    user.is_receiving_newsletter = is_receiving_newsletter;
-    user.is_policy_agreed = is_policy_agreed;
-    await db.User.create(user);
+    const user = {
+      display_name,
+      email,
+      username,
+      role,
+      employer,
+      profile_image_url: decoded.profile.profileImageUrl,
+      account_provider: decoded.provider,
+      is_receiving_newsletter,
+      is_policy_agreed
+    };
+    const newUser = await db.User.create(user);
 
     // Log in
-    const tokens = await user.generateUserToken();
+    const tokens = await newUser.generateUserToken();
     setTokenCookie(ctx, tokens);
     ctx.body = {
       ...user,
-      profile,
       tokens: {
         access_token: tokens.accessToken,
         refresh_token: tokens.refreshToken
       }
     };
-  } catch (err) {}
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 /**
@@ -203,10 +210,10 @@ export const registerUser = async ctx => {
 export const logOutUser = async ctx => {
   // clear cookies
   ctx.cookies.set('accessToken', '', {
-    // domain: process.env.NODE_ENV === 'development' ? undefined : '.disquiet.tech'
+    domain: process.env.NODE_ENV === 'development' ? undefined : '.disquiet.tech'
   });
   ctx.cookies.set('refreshToken', '', {
-    // domain: process.env.NODE_ENV === 'development' ? undefined : '.disquiet.tech'
+    domain: process.env.NODE_ENV === 'development' ? undefined : '.disquiet.tech'
   });
   ctx.status = 204;
 }

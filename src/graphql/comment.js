@@ -79,7 +79,7 @@ export const resolvers = {
           commentLike.user_id = ctx.userId;
           await db.CommentLike.create(commentLike);
         }
-      } catch(err) {
+      } catch (err) {
         console.log(err);
         return comment;
       }

@@ -8,6 +8,7 @@
     "@admin-bro/koa": "^1.1.1",
     "@admin-bro/passwords": "^1.0.3",
     "@admin-bro/sequelize": "^1.1.2",
+    "@koa/cors": "^3.1.0",
     "@koa/router": "^10.0.0",
     "admin-bro": "^3.3.1",
     "apollo-server-koa": "^2.19.0",

@@ -1,32 +1,25 @@
 import Koa from 'koa';
-import { buildAuthenticatedRouter } from '@admin-bro/koa';
-import argon2 from 'argon2';
 import bodyParser from 'koa-bodyparser';
+import cors from '@koa/cors';
 import { ApolloServer } from 'apollo-server-koa';
-import db from './database/models';
 import apiRouter from './router';
 import schema from './graphql/schema';
 import { authUser } from './lib/auth/token';
-import { adminBro } from './lib/admin';
+import { getAdminRouter } from './lib/admin';
 
 const app = new Koa();
 app.keys = [process.env.KOA_SECRET_KEY_1, process.env.KOA_SECRET_KEY_2];
 
 // Add admin panel
-const adminRouter = buildAuthenticatedRouter(adminBro, app, {
-  authenticate: async (email, password) => {
-    const user = await db.AdminUser.findOne({ where: { email } });
-    if (user && email && password && await argon2.verify(user.encrypted_password, password)) {
-      return user.toJSON();
-    }
-    return null;
-  },
-});
-
+const adminRouter = getAdminRouter(app);
 app.use(adminRouter.routes()).use(adminRouter.allowedMethods());
-app.use(apiRouter.routes()).use(apiRouter.allowedMethods());
+
+if (process.env.NODE_ENV === 'development') {
+  app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+}
 app.use(bodyParser());
 app.use(authUser);
+app.use(apiRouter.routes()).use(apiRouter.allowedMethods());
 
 const server = new ApolloServer({ 
   schema,

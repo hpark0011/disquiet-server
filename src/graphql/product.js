@@ -119,7 +119,7 @@ export const resolvers = {
 
           return newProduct;
         });
-      } catch(err) {
+      } catch (err) {
         console.log('Create product transaction failed: ', err);
       }
     },
@@ -196,7 +196,7 @@ export const resolvers = {
           productUpvote.user_id = ctx.userId;
           await db.ProductUpvote.create(productUpvote);
         }
-      } catch(err) {
+      } catch (err) {
         console.log(err);
         return product;
       }

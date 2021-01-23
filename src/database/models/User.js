@@ -1,5 +1,5 @@
 import { generateToken } from '../../lib/auth/token';
-import AuthToken from './AuthToken';
+import db from './index';
 
 export default (sequelize, DataTypes) => {
   const User = sequelize.define('user', {
@@ -31,7 +31,6 @@ export default (sequelize, DataTypes) => {
     },
   }, {
     underscored: true,
-    // paranoid: true // soft-deletion (in production?)
   });
 
   User.associate = (db) => {
@@ -53,19 +52,19 @@ export default (sequelize, DataTypes) => {
     });
   }
 
-  User.prototype.generateUserToken = async () => {
-    const authToken = new AuthToken();
-    authToken.user_id = this.id;
-    await AuthToken.save(authToken);
+  User.prototype.generateUserToken = async function () {
+    await db.AuthToken.create({ 
+      userId: this.dataValues.id
+    });
     const refreshToken = await generateToken({
-      user_id: this.id,
+      user_id: this.dataValues.id,
       token_id: authToken.id
     }, {
       subject: 'refreshToken',
       expiresIn: '30d'
     });
     const accessToken = await generateToken({
-      user_id: this.id
+      user_id: this.dataValues.id
     }, {
       subject: 'accessToken',
       expiresIn: '1h'
@@ -73,13 +72,13 @@ export default (sequelize, DataTypes) => {
     return { refreshToken, accessToken };
   }
 
-  User.prototype.refreshUserToken = async (tokenId, refreshTokenExp, oldRefreshToken) => {
+  User.prototype.refreshUserToken = async function (tokenId, refreshTokenExp, oldRefreshToken) {
     const remainingTime = refreshTokenExp * 1000 - new Date().getTime();
     let refreshToken = oldRefreshToken;
     // Renew token if remaining time is less than 5 days
     if (remainingTime < 1000 * 60 * 60 * 24 * 5) {
       refreshToken = await generateToken({
-        user_id: this.id,
+        user_id: this.dataValues.id,
         token_id: tokenId
       }, {
         subject: 'refreshToken',
@@ -87,7 +86,7 @@ export default (sequelize, DataTypes) => {
       });
     }
     const accessToken = await generateToken({
-      user_id: this.id
+      user_id: this.dataValues.id
     }, {
       subject: 'accessToken',
       expiresIn: '1h'
