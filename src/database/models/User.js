@@ -53,9 +53,9 @@ export default (sequelize, DataTypes) => {
   }
 
   User.prototype.generateUserToken = async function () {
-    await db.AuthToken.create({ 
-      userId: this.dataValues.id
-    });
+    const authToken = { userId: this.dataValues.id };
+    await db.AuthToken.create(authToken);
+    
     const refreshToken = await generateToken({
       user_id: this.dataValues.id,
       token_id: authToken.id

@@ -31,6 +31,7 @@ export const typeDef = gql`
 
   extend type Query {
     user(id: Int!): User
+    auth: User
   }
 
   extend type Mutation {
@@ -44,6 +45,10 @@ export const resolvers = {
     user: async (_, { id }) => {
       return await db.User.findByPk(id);
     },
+    auth: async (_, params, ctx) => {
+      if (!ctx.userId) return null;
+      return await db.User.findByPk(ctx.userId);
+    }
   },
   Mutation: {
     updateUser: async (_, { id, input }, ctx) => {

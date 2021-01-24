@@ -77,7 +77,7 @@ export const authUser = async (ctx, next) => {
       throw new Error('No Access Token!');
     }
     const decoded = await decodeToken(accessToken);
-    ctx.state.userId = decoded.userId;
+    ctx.state.userId = decoded.user_id;
     // Renew token when access token remaining time is less than 30 min
     const remainingTime = decoded.exp * 1000 - new Date().getTime();
     if (refreshToken && remainingTime < 1000 * 60 * 30) {

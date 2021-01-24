@@ -190,13 +190,7 @@ export const registerUser = async ctx => {
     // Log in
     const tokens = await newUser.generateUserToken();
     setTokenCookie(ctx, tokens);
-    ctx.body = {
-      ...user,
-      tokens: {
-        access_token: tokens.accessToken,
-        refresh_token: tokens.refreshToken
-      }
-    };
+    ctx.body = { ...user };
   } catch (err) {
     console.log(err);
   }
